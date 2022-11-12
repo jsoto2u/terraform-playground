@@ -1,5 +1,5 @@
 # We use Terraform where I work, so I wanted to create my own test Terraform project to get an idea of how it functions. This
-# launches a webserver and install Ubuntu, and assigns it an IP so you can SSH into it.
+# launches a webserver and installs Ubuntu, and assigns it an IP so you can SSH into it.
 
 
 provider "aws" {
