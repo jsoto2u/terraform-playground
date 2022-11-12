@@ -1,3 +1,7 @@
+# We use Terraform where I work, so I wanted to create my own test Terraform project to get an idea of how it functions. This
+# launches a webserver and install Ubuntu, and assigns it an IP so you can SSH into it.
+
+
 provider "aws" {
   region = "us-east-1"
   access_key = "insert access key"
