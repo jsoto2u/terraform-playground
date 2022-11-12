@@ -1,11 +1,11 @@
 # We use Terraform where I work, so I wanted to create my own test Terraform project to get an idea of how it functions. This
-# launches a webserver and installs Ubuntu, and assigns it an IP so you can SSH into it.
+# launches an Ubuntu webserver and installs apache with Terraform. You can SSH into the box and play around however you want!
 
 
 provider "aws" {
   region = "us-east-1"
-  access_key = "insert access key"
-  secret_key = "insert secret key"
+  access_key = "insert access_key"
+  secret_key = "insert secret_key"
 }
 
 # Creates VPC
@@ -32,7 +32,7 @@ resource "aws_route_table" "prod-route-table" {
 
   route {
     ipv6_cidr_block        = "::/0"
-    gateway_id = aws_internet_gateway.gw.id
+    gateway_id             = aws_internet_gateway.gw.id
   }
 
   tags = {
@@ -57,7 +57,7 @@ resource "aws_route_table_association" "a" {
   route_table_id = aws_route_table.prod-route-table.id
 }
 
-# Creates a security group.
+# Creates a security group to allow port 22, 80, and 443.
 resource "aws_security_group" "allow_web" {
   name        = "allow_web_traffic"
   description = "Allow Web inbound traffic"
@@ -81,8 +81,8 @@ resource "aws_security_group" "allow_web" {
 
     ingress {
     description      = "SSH"
-    from_port        = 2
-    to_port          = 2
+    from_port        = 22
+    to_port          = 22
     protocol         = "tcp"
     cidr_blocks      = ["0.0.0.0/0"]
   }
@@ -112,7 +112,7 @@ resource "aws_network_interface" "web-server-nic" {
 resource "aws_eip" "one" {
   vpc                       = true
   network_interface         = aws_network_interface.web-server-nic.id
-  associate_with_private_ip = "10.0.0.10"
+  associate_with_private_ip = "10.0.1.50"
   depends_on = [aws_internet_gateway.gw]
 }
 
@@ -140,4 +140,3 @@ resource "aws_instance" "web-server-instance" {
         Name = "web-server"
     }
 }
-
