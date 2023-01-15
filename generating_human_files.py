@@ -78,8 +78,6 @@ def generate_human_file(project_id):
     user_cost_center = user_cost_center.replace("N/A", "")
   user_title = user_details_dict['Job Title']
 
-  print(denver_peeps)
-
   # This is the contents of the human file with the variables subbed in.
   human_file_contents = """module "okta_add_user_{first_name}_{module_last_name}" {{
   # Okta attributes
