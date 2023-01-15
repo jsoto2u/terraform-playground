@@ -121,7 +121,6 @@ def generate_human_file(project_id):
 
   # Moves the human file to the desired folder.
   file_being_moved = f"{first_name.lower()}.{last_name.lower()}.tf"
-  # destination_path = f"{os.path.expanduser('~')}/GitHub/infrastructure-it-terraform-okta-identity/humans/"
   destination_path = f"{os.path.expanduser('~')}/Desktop/Example_Folder"
   shutil.move(file_being_moved, destination_path)
 
