@@ -122,6 +122,7 @@ def generate_human_file(project_id):
   destination_path = f"{os.path.expanduser('~')}/Desktop/Example_Folder"
   shutil.move(file_being_moved, destination_path)
 
+# Grabs all of the user's project ids from the portfolio id in Asana.
 def find_project_gids():
   url = "https://app.asana.com/api/1.0/portfolios/1203496810966165/items"
 
