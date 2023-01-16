@@ -17,23 +17,17 @@ def generate_human_file(project_id):
   response = response.json()
   user_details_string = response['data']['notes']
 
-  # This gets the notes user data from the API configured into a couple of dictionaries so
+  # This gets the notes user data from the API configured into a dictionary so
   # they're easy to work with.
-  # There needed to be some extra configuring for the user addresses.
-  user_details_dict = []
-  user_address_dict = []
-
   user_details = user_details_string.splitlines()
+
+  user_details_dict = {}
+
   for detail in user_details:
-    if "Shipping Address" in detail:
-      user_address_dict.append(map(str.strip, detail.split(':', 1)))
-
-    for data in detail.split(','):
-        if ':' in data:
-            user_details_dict.append(map(str.strip, data.split(':', 1)))
-
-  user_address_dict = dict(user_address_dict)
-  user_details_dict = dict(user_details_dict)
+    key = detail.split(':', 1)[0].strip()
+    value = detail.split(':', 1)[1].strip()
+    
+    user_details_dict.update({key: value})
 
   # These are the variables we need defined to create the dynamic human file.
   # Some logic to handle three name splits, as well as names with apostrophes.
@@ -55,7 +49,7 @@ def generate_human_file(project_id):
   last_name = last_name.replace("'", "")
 
   # User shipping information.
-  shipping_address = user_address_dict['Shipping Address']
+  shipping_address = user_details_dict['Shipping Address']
 
   #Finds the State Code.
   state_code = re.search(r'\b[A-Z]{2}\b', shipping_address)
@@ -119,7 +113,8 @@ def generate_human_file(project_id):
 
   # Moves the human file to the desired folder.
   file_being_moved = f"{first_name.lower()}.{last_name.lower()}.tf"
-  destination_path = f"{os.path.expanduser('~')}/Desktop/Example_Folder"
+  destination_path = f"{os.path.expanduser('~')}/GitHub/infrastructure-it-terraform-okta-identity/humans/"
+  # destination_path = f"{os.path.expanduser('~')}/Desktop/Example_Folder"
   shutil.move(file_being_moved, destination_path)
 
 # Grabs all of the user's project ids from the portfolio id in Asana.
