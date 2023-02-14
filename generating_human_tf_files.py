@@ -2,15 +2,22 @@ import requests
 import os
 import shutil
 import re
+from sensitive import token
+
+### This script reads from Asana Onboarding projects and transfers new user information into
+### our human file format. IT then saves the files in your local identity repo. After you
+### run the script, open up Github desktop and you'll see all of the human files it has made for you.
+### You'll likely need to make sure all of the titles and etc. match up in Terraform,
+### since the new user information it's using are inputs from Talent.
 
 def generate_human_file(project_id):
-  # This is the get request of the project URL. The #s are the project ID.
+  # This is the get request of the project URL.
   url = f"https://app.asana.com/api/1.0/projects/{project_id}"
 
   payload={}
   headers = {
     'Accept': 'application/json',
-    'Authorization': 'Bearer INSERT BEARER TOKEN'
+    'Authorization': f'Bearer {token}'
   }
 
   response = requests.request("GET", url, headers=headers, data=payload)
@@ -22,7 +29,7 @@ def generate_human_file(project_id):
   user_details = user_details_string.splitlines()
 
   user_details_dict = {}
-
+  
   for detail in user_details:
     key = detail.split(':', 1)[0].strip()
     value = detail.split(':', 1)[1].strip()
@@ -45,6 +52,8 @@ def generate_human_file(project_id):
     module_last_name = last_name
     module_last_name = module_last_name.replace("'", "")
 
+  preferred_first_name = user_details_dict["Preferred First Name"]
+
   first_name = full_name_split[0]
   last_name = last_name.replace("'", "")
 
@@ -60,7 +69,7 @@ def generate_human_file(project_id):
   # denver_peeps = denver_peeps.group(0)
 
   # User and their manager's emails.
-  user_email = first_name.lower() + "." + last_name.lower() + "@redcanary.com"
+  user_email = preferred_first_name.lower() + "." + last_name.lower() + "@redcanary.com"
   manager_email = user_details_dict['Manager'].lower()
   manager_email = manager_email.replace(' ', ".") + "@redcanary.com"
 
@@ -73,14 +82,14 @@ def generate_human_file(project_id):
   user_title = user_details_dict['Job Title']
 
   # This is the contents of the human file with the variables subbed in.
-  human_file_contents = """module "okta_add_user_{first_name}_{module_last_name}" {{
+  human_file_contents = """module "okta_add_user_{preferred_first_name}_{module_last_name}" {{
   # Okta attributes
   source = "../modules/okta_user"
   status = "STAGED"
   user_type  = "Employee"
   user_email = "{user_email}"
   # Name Information
-  first_name = "{first_name}"
+  first_name = "{preferred_first_name}"
   last_name  = "{string_last_name}"
   #     middleName = ""
   #     honorificPrefix = ""
@@ -89,7 +98,7 @@ def generate_human_file(project_id):
   #     second_email = ""
   mobile_phone = ""
   # Location Information
-  state        = "{state_code}"
+  state        = ""
   country_code = "US"
   # Job Information
   organization = "Red Canary"
@@ -108,23 +117,27 @@ def generate_human_file(project_id):
 
   # Writes a new .tf file with the specified content. To overwrite a file, we'd first check if 
   # it existed and then delete it before creating a new one.
-  human_file = open(f"{first_name.lower()}.{last_name.lower()}.tf", "w")
+  human_file = open(f"{preferred_first_name.lower()}.{last_name.lower()}.tf", "w")
   human_file.write(human_file_contents)
 
   # Moves the human file to the desired folder.
-  file_being_moved = f"{first_name.lower()}.{last_name.lower()}.tf"
-  destination_path = f"{os.path.expanduser('~')}/GitHub/infrastructure-it-terraform-okta-identity/humans/"
+  file_being_moved = f"{preferred_first_name.lower()}.{last_name.lower()}.tf"
+  destination_path = f"{os.path.expanduser('~')}/GitHub/infrastructure-it-terraform-okta-identity/users_and_groups/humans/"
   # destination_path = f"{os.path.expanduser('~')}/Desktop/Example_Folder"
   shutil.move(file_being_moved, destination_path)
 
+print("")
+print("Hello! Please enter the onboarding portoflio id #. \nThis is the sixteen digit number found in the onboarding portfolio's hyperlink. \n(ie, https://app.asana.com/api/1.0/portfolios/################/items)")
+print("")
+input = input()
 # Grabs all of the user's project ids from the portfolio id in Asana.
 def find_project_gids():
-  url = "https://app.asana.com/api/1.0/portfolios/1203496810966165/items"
+  url = f"https://app.asana.com/api/1.0/portfolios/{input}/items"
 
   payload={}
   headers = {
     'Accept': 'application/json',
-    'Authorization': 'Bearer INSERT BEARER TOKEN'
+    'Authorization': f'Bearer {token}'
   }
 
   response = requests.request("GET", url, headers=headers, data=payload)
@@ -135,3 +148,7 @@ def find_project_gids():
   return project_gids
 
 [generate_human_file(project_id) for project_id in find_project_gids()]
+
+print("")
+print("All done! Check Github Desktop and review your human files.")
+print("")
