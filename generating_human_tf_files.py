@@ -5,7 +5,7 @@ import re
 from sensitive import token
 
 ### This script reads from Asana Onboarding projects and transfers new user information into
-### our human file format. IT then saves the files in your local identity repo. After you
+### our human file format. It then saves the files in your local identity repo. After you
 ### run the script, open up Github desktop and you'll see all of the human files it has made for you.
 ### You'll likely need to make sure all of the titles and etc. match up in Terraform,
 ### since the new user information it's using are inputs from Talent.
