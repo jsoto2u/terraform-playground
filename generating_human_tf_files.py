@@ -5,14 +5,11 @@ import re
 from sensitive import token
 
 ### This script reads from Asana Onboarding projects and transfers new user information into
-### our human file format. It then saves the files in your local identity repo. After you
-### run the script, open up Github desktop and you'll see all of the human files it has made for you.
-### You'll likely need to make sure all of the titles and etc. match up in Terraform,
-### since the new user information it's using are inputs from Talent.
+### a 'human file' format. It then saves the files in your specified repo.
 
 def generate_human_file(project_id):
   # This is the get request of the project URL.
-  url = f"https://app.asana.com/api/1.0/projects/{project_id}"
+  url = f"{projecturl}"
 
   payload={}
   headers = {
@@ -101,7 +98,7 @@ def generate_human_file(project_id):
   state        = ""
   country_code = "US"
   # Job Information
-  organization = "Red Canary"
+  organization = "{organization}"
   division     = "{user_division}"
   department   = "{user_department}"
   cost_center  = "{user_cost_center}"
