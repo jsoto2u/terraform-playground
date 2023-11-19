@@ -1,12 +1,12 @@
 ## Quick EC2 Instance Setup for Ansible Testing
-##
+
 ## This script rapidly deploys 5 EC2 instances for testing various Ansible playbooks. 
-## It takes an image from AWS (variable set in the .tfvars file) and relies on 
-## a local machine for execution. It also outputs the public IPs of the instance after 
-## you run terraform apply, in addition to the SSH command to access those instances.
+## It takes an image from AWS (variable set in the `.tfvars` file) and assigns the specified
+## key pair to the instances for access. After running `terraform apply`, it outputs the 
+## public IPs of the instances along with the SSH command for access.
 
 provider "aws" {
-  region = var.us_region
+  region = var.region
 }
 
 variable "allowed_ingress_ports" {
@@ -47,18 +47,12 @@ resource "aws_security_group" "webtrafficnssh" {
   }
 }
 
-# Create an AWS Key Pair using the public key from your local env
-resource "aws_key_pair" "example_key_pair" {
-  key_name   = "id_rsa"
-  public_key = file("~/.ssh/id_rsa.pub")  # Replace with the path to your public key
-}
-
 # Launch 5 EC2 instances using the same AWS Key Pair
 resource "aws_instance" "example_instance" {
-  count         = 5
+  count         = var.instance_number
   ami           = var.ami_id
   instance_type = var.instance_type
-  key_name      = aws_key_pair.example_key_pair.key_name
+  key_name      = var.key_pair_name
 }
 
 # Output the public IPs of the created instances

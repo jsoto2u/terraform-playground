@@ -9,3 +9,11 @@ variable "instance_type" {
 variable "region" {
   description = "Your desired AWS region."
 }
+
+variable "instance_number" {
+  description = "The number of these instances you would like to launch."
+}
+
+variable "key_pair_name" {
+  description = "The name of your AWS Key Pair."
+}
