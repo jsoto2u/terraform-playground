@@ -33,4 +33,3 @@ To SSH into the instances, use the provided SSH command.
 ## Examples
 - Customizing the number of instances.
 - Customize type of OS needed for instances.
-- ...
