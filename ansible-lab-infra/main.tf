@@ -5,11 +5,48 @@
 ## It also outputs the public IPs of the instance after you run terraform apply.
 ##
 ## To be added:
-## - Dynamic block security groups
 ## - Variables for key-pairs for easy adjustments
 
 provider "aws" {
   region = "us-east-2"  # Replace with your desired AWS region
+}
+
+variable "allowed_ingress_ports" {
+  type    = set(number)
+  default = [80, 443]
+}
+
+variable "allowed_egress_ports" {
+  type    = set(number)
+  default = [80, 443, 25, 3306, 53, 8080]
+}
+
+## Dynamic security group blocks. It's using an iterator to cycle through
+## the ports we labeled in our allowed_ingress_ports/allowed_egress_ports variables.
+resource "aws_security_group" "webtraffic" {
+  name = "Allow HTTPS"
+
+  dynamic "ingress" {
+    iterator = port
+    for_each = var.allowed_ingress_ports
+    content {
+      from_port   = port.value
+      to_port     = port.value
+      protocol    = "TCP"
+      cidr_blocks = ["0.0.0.0/0"]
+    }
+  }
+
+  dynamic "egress" {
+    iterator = port
+    for_each = var.allowed_egress_ports
+    content {
+      from_port   = port.value
+      to_port     = port.value
+      protocol    = "TCP"
+      cidr_blocks = ["0.0.0.0/0"]
+    }
+  }
 }
 
 # Create an AWS Key Pair using the public key from your local env
