@@ -1,69 +1,59 @@
 ## Quick EC2 Instance Setup for Ansible Testing
 
-## This script rapidly deploys 5 EC2 instances for testing various Ansible playbooks. 
-## It takes an image from AWS (variable set in the `.tfvars` file) and assigns the specified
-## key pair to the instances for access. After running `terraform apply`, it outputs the 
-## public IPs of the instances along with the SSH command for access.
+## This script rapidly deploys a specified number of EC2 instances for testing various 
+## Ansible playbooks. It takes an image from AWS and assigns the specified key pair to 
+## the instances for access. After running `terraform apply`, it outputs the public IPs 
+## of the instances along with the SSH command for access.
 
 provider "aws" {
   region = var.region
 }
 
-variable "allowed_ingress_ports" {
-  type    = set(number)
-  default = [22, 80, 443]
-}
+## Dynamic security groups. Since we're using it for an Ansible test env,
+## we're allowing SSH traffic in, and all Web traffic out.
 
-variable "allowed_egress_ports" {
-  type    = set(number)
-  default = [80, 443, 25, 3306, 53, 8080]
-}
-
-## Dynamic security group blocks. It's using an iterator to cycle through
-## the ports we labeled in our allowed_ingress_ports/allowed_egress_ports variables.
-resource "aws_security_group" "webtrafficnssh" {
-  name = "Allow HTTPS and SSH"
+resource "aws_security_group" "webtraffic_and_ssh" {
+  name        = "Security group for Ansible access"
+  description = "Allow SSH and outbound traffic for Ansible"
 
   dynamic "ingress" {
-    iterator = port
     for_each = var.allowed_ingress_ports
     content {
-      from_port   = port.value
-      to_port     = port.value
-      protocol    = "TCP"
-      cidr_blocks = ["0.0.0.0/0"]
+      from_port   = ingress.key
+      to_port     = ingress.key
+      protocol    = "tcp"
+      cidr_blocks = [var.ansible_ip]
     }
   }
 
-  dynamic "egress" {
-    iterator = port
-    for_each = var.allowed_egress_ports
-    content {
-      from_port   = port.value
-      to_port     = port.value
-      protocol    = "TCP"
-      cidr_blocks = ["0.0.0.0/0"]
-    }
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
   }
 }
 
-# Launch 5 EC2 instances using the same AWS Key Pair
-resource "aws_instance" "example_instance" {
+# Launch 5 EC2 instances using the same AWS Key Pair. Associate them with the
+# specified security group allowing SSH traffic in and all Web traffic out.
+resource "aws_instance" "ansible_test_instance" {
   count         = var.instance_number
   ami           = var.ami_id
   instance_type = var.instance_type
   key_name      = var.key_pair_name
+
+  vpc_security_group_ids = [aws_security_group.webtraffic_and_ssh.id]
 }
 
-# Output the public IPs of the created instances
+## Output the public IPs of the created instances for easy transfer to
+## Ansible inventory lists.
 output "public_ips" {
-  value = aws_instance.example_instance[*].public_ip
+  value = aws_instance.ansible_test_instance[*].public_ip
 }
 
-# Output a message with SSH connection information
+## Output SSH instructions for each instance using a single private key for easy
+## access to the individual hosts.
 output "ssh_instructions" {
-  value = <<-EOT
-    To SSH into the instances, use the following command:
-    ssh -i ~/.ssh/id_rsa ec2-user@${aws_instance.example_instance[0].public_ip}
-  EOT
+  value = join("\n", [for instance in aws_instance.ansible_test_instance : 
+    "Instance: ssh -i ~/.ssh/${var.key_pair_name}.pem ec2-user@${instance.public_ip}"])
 }

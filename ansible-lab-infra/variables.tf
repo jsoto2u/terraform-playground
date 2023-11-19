@@ -17,3 +17,12 @@ variable "instance_number" {
 variable "key_pair_name" {
   description = "The name of the keypair you'll be using in AWS."
 }
+
+variable "ansible_ip" {
+  description = "The IP address or range from which Ansible will connect."
+}
+
+variable "allowed_ingress_ports" {
+  type    = set(number)
+  default = [22, 80, 443]
+}
