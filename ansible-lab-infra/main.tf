@@ -5,7 +5,6 @@
 ## It also outputs the public IPs of the instance after you run terraform apply.
 ##
 ## To be added:
-## - Dynamic block security groups
 ## - Variables for key-pairs for easy adjustments
 
 provider "aws" {
