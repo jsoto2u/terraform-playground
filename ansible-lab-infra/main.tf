@@ -5,6 +5,7 @@
 ## It also outputs the public IPs of the instance after you run terraform apply.
 ##
 ## To be added:
+## - Dynamic block security groups
 ## - Variables for key-pairs for easy adjustments
 
 provider "aws" {
@@ -55,12 +56,14 @@ resource "aws_key_pair" "example_key_pair" {
   public_key = file("~/.ssh/example-key-pair.pub")  # Replace with the path to your public key
 }
 
-# Launch 5 EC2 instances using the same AWS Key Pair
+# Launch 5 EC2 instances using the same AWS Key Pair and associate them with the security group
 resource "aws_instance" "example_instance" {
   count         = 5
   ami           = "ami-0931978297f275f71"  # Replace with your desired AMI ID
   instance_type = "t2.micro"                # Replace with your desired instance type
   key_name      = aws_key_pair.example_key_pair.key_name
+
+  vpc_security_group_ids = [aws_security_group.webtraffic.id]  # Reference the security group ID
 }
 
 # Output the public IPs of the created instances
