@@ -15,5 +15,5 @@ variable "instance_number" {
 }
 
 variable "key_pair_name" {
-  description = "The name of your AWS Key Pair."
+  description = "The name of the keypair you'll be using in AWS."
 }
