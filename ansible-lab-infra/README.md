@@ -15,9 +15,13 @@ This Terraform project deploys EC2 instances for testing Ansible playbooks. It a
 ## Configuration
 
 ### Variables
-- `region`: Your desired AWS region.
-- `ami_id`: The ID of the Amazon Machine Image (AMI) to use.
-- ...
+- `region`: Your preferred AWS region for deploying resources.
+- `ami_id`: The unique identifier of the Amazon Machine Image (AMI) to be used for EC2 instances.
+- `instance_type`: The type of EC2 instance to launch, specifying the compute and memory capacity.
+- `instance_number`: The number of EC2 instances to be deployed.
+- `key_pair_name`: The name of the AWS key pair to associate with the EC2 instances for SSH access.
+- `ansible_ip`: The IP address or range from which Ansible will connect to the EC2 instances.
+- `allowed_ingress_ports`: A list of ports to allow incoming traffic to the EC2 instances.
 
 ### Security Group
 The security group allows inbound SSH traffic and outbound traffic for Ansible.
