@@ -6,6 +6,7 @@
 ##
 ## To be added:
 ## - Variables for key-pairs for easy adjustments
+## - Perhaps variables for AMI instance type to easily swap OSes?
 
 provider "aws" {
   region = "us-east-2"  # Replace with your desired AWS region
