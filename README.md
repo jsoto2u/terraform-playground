@@ -12,7 +12,7 @@ with others.
   
 ## What will you find in this repo?  
   
-In this repo, you will find various Terraform modules and configurations that I have created to test  
-out different applications of Terraform. It is going to be messy for a while, until I have more time.
+In this repo, you will find various Terraform scripts that I have created to test  
+out different applications of Terraform. It is going to be messy for a while.
   
 I'll make sure to organize it at some point. Until then, cheers! ☕
